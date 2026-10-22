@@ -494,7 +494,7 @@ public class EventsServiceImpl implements EventsService {
         }
 
         if (eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ConflictException(errorMessage);
+            throw new ValidationException(errorMessage);
         }
 
         return eventDate;
