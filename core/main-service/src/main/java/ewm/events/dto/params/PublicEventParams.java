@@ -17,9 +17,7 @@ import java.util.List;
 public class PublicEventParams {
 
     private String text;
-
     private List<Long> categories;
-
     private Boolean paid;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -30,10 +28,7 @@ public class PublicEventParams {
 
     @Builder.Default
     private Boolean onlyAvailable = false;
-
     private EventSort sort;
-
     private Integer from;
-
     private Integer size;
 }

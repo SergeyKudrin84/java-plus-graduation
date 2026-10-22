@@ -70,8 +70,8 @@ public class EventsServiceImpl implements EventsService {
         LocalDateTime startDate = params.getRangeStart();
         LocalDateTime endDate = params.getRangeEnd();
 
-        if (startDate == null && endDate == null) {
-            startDate = LocalDateTime.now();
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+            throw new ValidationException("rangeStart must be before rangeEnd");
         }
 
         sendHitToStats("/events", request.getRemoteAddr());
