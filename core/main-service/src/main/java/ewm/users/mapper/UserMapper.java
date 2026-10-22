@@ -5,6 +5,7 @@ import ewm.users.dto.NewUserRequest;
 import ewm.users.dto.UserDto;
 import ewm.users.dto.UserShortDto;
 import ewm.users.model.User;
+import org.mapstruct.Mapping;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ public interface UserMapper {
 
     UserShortDto toUserShortDto(User user);
 
+    @Mapping(target = "id", ignore = true)
     User toUser(NewUserRequest newUserRequest);
 
     List<UserDto> toUserDtoList(List<User> users);
