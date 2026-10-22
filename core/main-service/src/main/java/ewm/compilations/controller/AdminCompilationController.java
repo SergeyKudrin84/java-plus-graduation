@@ -28,7 +28,7 @@ public class AdminCompilationController {
 
     @PatchMapping("/{compId}")
     public ResponseEntity<CompilationDto> update(@PathVariable Long compId,
-                                                 @RequestBody UpdateCompilationRequest dto) {
+                                                 @Valid @RequestBody UpdateCompilationRequest dto) {
         log.info("PATCH /admin/compilations/{}: UpdateCompilationRequest={}", compId, dto);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(compilationService.update(compId, dto));
