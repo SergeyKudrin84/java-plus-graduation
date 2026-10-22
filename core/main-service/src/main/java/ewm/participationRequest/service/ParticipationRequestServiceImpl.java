@@ -81,7 +81,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
             throw new ConflictException(EVENT_OVER_LIMIT);
         }
 
-        if (!event.getRequestModeration()) {
+        if (event.getParticipantLimit() == 0 || !event.getRequestModeration()) {
             request.setStatus(ParticipationStatus.CONFIRMED);
         } else {
             request.setStatus(ParticipationStatus.PENDING);
