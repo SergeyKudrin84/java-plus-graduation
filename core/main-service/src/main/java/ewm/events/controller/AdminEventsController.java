@@ -4,6 +4,7 @@ import ewm.events.dto.EventFullDto;
 import ewm.events.dto.UpdateEventAdminRequest;
 import ewm.events.dto.params.AdminEventParams;
 import ewm.events.service.EventsService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +59,7 @@ public class AdminEventsController {
     @PatchMapping("/{eventId}")
     public ResponseEntity<EventFullDto> updateEventByAdmin(
             @PathVariable Long eventId,
-            @RequestBody UpdateEventAdminRequest request
+            @Valid @RequestBody UpdateEventAdminRequest request
     ) {
         log.info("PATCH /admin/events/{}", eventId);
 
