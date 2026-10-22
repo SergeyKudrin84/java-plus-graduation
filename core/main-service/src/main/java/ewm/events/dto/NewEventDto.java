@@ -33,7 +33,7 @@ public class NewEventDto {
     private Boolean paid = false;
 
     @Builder.Default
-    @Positive
+    @PositiveOrZero(message = "Количество участников не может быть меньше нуля")
     private Integer participantLimit = 0;
 
     @Builder.Default
