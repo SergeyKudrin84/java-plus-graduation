@@ -9,7 +9,8 @@ import java.util.List;
 
 @FeignClient(
         name = "user-service",
-        path = "/admin/users"
+        path = "/admin/users",
+        fallbackFactory = UserClientFallbackFactory.class
 )
 public interface UserClient {
 
