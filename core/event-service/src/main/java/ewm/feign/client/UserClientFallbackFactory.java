@@ -1,4 +1,4 @@
-package ewm.users.client;
+package ewm.feign.client;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.FallbackFactory;

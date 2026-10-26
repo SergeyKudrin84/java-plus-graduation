@@ -20,9 +20,8 @@ public class ParticipationRequest {
     @Column(name = "requester_id", nullable = false)
     private Long requesterId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id", nullable = false)
-    private Event event;
+    @Column(name = "event_id", nullable = false)
+    private Long eventId;
 
     @Column(name = "created", nullable = false)
     private LocalDateTime created;

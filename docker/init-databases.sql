@@ -4,3 +4,4 @@
 CREATE DATABASE stats_db;
 CREATE DATABASE ewm_db;
 CREATE DATABASE user_db;
+CREATE DATABASE event_db;

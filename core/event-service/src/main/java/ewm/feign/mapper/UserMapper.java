@@ -1,8 +1,8 @@
-package ewm.users.mapper;
+package ewm.feign.mapper;
 
-import ewm.users.client.dto.UserResponseDto;
+import ewm.feign.client.dto.UserResponseDto;
+import ewm.feign.client.dto.UserShortDto;
 import org.mapstruct.Mapper;
-import ewm.users.client.dto.UserShortDto;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {

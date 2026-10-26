@@ -1,4 +1,4 @@
-package ewm.users.client.dto;
+package ewm.feign.client.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

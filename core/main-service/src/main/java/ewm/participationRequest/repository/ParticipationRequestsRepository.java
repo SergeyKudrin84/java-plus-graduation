@@ -1,6 +1,5 @@
 package ewm.participationRequest.repository;
 
-import ewm.events.model.Event;
 import ewm.participationRequest.dto.EventRequestsCountDto;
 import ewm.participationRequest.model.ParticipationRequest;
 import ewm.participationRequest.model.ParticipationStatus;
@@ -18,7 +17,7 @@ public interface ParticipationRequestsRepository
 
     @Query("""
             select new ewm.participationRequest.dto.EventRequestsCountDto(
-                r.event.id,
+                r.eventId,
                 count(r.id)
             )
             from ParticipationRequest r
@@ -28,10 +27,10 @@ public interface ParticipationRequestsRepository
             """)
     List<EventRequestsCountDto> getConfirmedRequests(@Param("eventIds") List<Long> eventIds);
 
-    @EntityGraph(attributePaths = {"event"})
+    //@EntityGraph(attributePaths = {"event"})
     List<ParticipationRequest> findAllByRequesterId(Long requesterId);
 
-    @EntityGraph(attributePaths = {"event"})
+    //@EntityGraph(attributePaths = {"event"})
     Optional<ParticipationRequest> findByIdAndRequesterId(Long id, Long requesterId);
 
     boolean existsByRequesterIdAndEventId(Long requesterId, Long eventId);
@@ -42,7 +41,7 @@ public interface ParticipationRequestsRepository
     List<ParticipationRequest> findByRequesterId(Long requesterId);
 
     //@EntityGraph(attributePaths = {"requester", "event", "event.initiator"})
-    Long countByEventAndStatus(Event event, ParticipationStatus status);
+    //Long countByEventAndStatus(Event event, ParticipationStatus status);
 
     //boolean existsByRequesterAndEvent(User requester, Event event);
 

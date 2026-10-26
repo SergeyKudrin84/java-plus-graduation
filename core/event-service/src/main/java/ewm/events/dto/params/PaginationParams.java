@@ -1,4 +1,4 @@
-package ewm.users.client.dto;
+package ewm.events.dto.params;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserResponseDto {
-    private Long id;
-    private String name;
-    private String email;
+public class PaginationParams {
+    private Integer from;
+    private Integer size;
 }

@@ -3,11 +3,14 @@ package ewm.participationRequest.service;
 import ewm.events.model.Event;
 import ewm.exception.ConflictException;
 import ewm.exception.ValidationException;
+import ewm.participationRequest.dto.EventRequestStatusUpdateRequest;
+import ewm.participationRequest.dto.EventRequestStatusUpdateResult;
+import ewm.participationRequest.dto.EventRequestsCountDto;
 import ewm.participationRequest.dto.ParticipationRequestDto;
 import ewm.participationRequest.model.ParticipationRequest;
 import ewm.participationRequest.model.ParticipationStatus;
-import ewm.users.client.UserClient;
-import ewm.users.client.dto.UserResponseDto;
+import ewm.feign.client.UserClient;
+import ewm.feign.client.dto.UserResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +21,7 @@ import ewm.events.repository.EventsRepository;
 import ewm.events.model.State;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -63,7 +67,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         );
 
         ParticipationRequest request = new ParticipationRequest();
-        Long confirmedRequests = requestRepository.countByEventAndStatus(event, ParticipationStatus.CONFIRMED);
+        Long confirmedRequests = requestRepository.countByEventIdAndStatus(eventId, ParticipationStatus.CONFIRMED);
 
         if (requestRepository.existsByRequesterIdAndEventId(userId, eventId)) {
             throw new ConflictException(REQUEST_ALREADY_EXISTS);
@@ -88,7 +92,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         }
 
         request.setRequesterId(userId);
-        request.setEvent(event);
+        request.setEventId(eventId);
         request.setCreated(LocalDateTime.now());
 
         ParticipationRequest saveRequest = requestRepository.save(request);
@@ -121,5 +125,147 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         if (users.isEmpty()) {
             throw new NotFoundException(USER_NOT_FOUND + userId);
         }
+    }
+
+    @Override
+    public List<EventRequestsCountDto> getConfirmedRequests(List<Long> eventIds) {
+        if (eventIds == null || eventIds.isEmpty()) {
+            return List.of();
+        }
+
+        return requestRepository.getConfirmedRequests(eventIds);
+    }
+
+    @Override
+    public List<ParticipationRequestDto> getEventRequests(Long eventId) {
+        return requestRepository.findAllByEventId(eventId)
+                .stream()
+                .map(requestMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public EventRequestStatusUpdateResult updateEventRequests(
+            Long eventId,
+            EventRequestStatusUpdateRequest request
+    ) {
+        List<Long> requestIds = request.getRequestIds();
+
+        if (requestIds == null || requestIds.isEmpty()) {
+            return EventRequestStatusUpdateResult.builder()
+                    .confirmedRequests(List.of())
+                    .rejectedRequests(List.of())
+                    .build();
+        }
+
+        ParticipationStatus targetStatus = request.getStatus();
+
+        if (targetStatus != ParticipationStatus.CONFIRMED
+                && targetStatus != ParticipationStatus.REJECTED) {
+            throw new ConflictException(
+                    "Доступные статусы только CONFIRMED/REJECTED"
+            );
+        }
+
+        List<ParticipationRequest> requests =
+                requestRepository.findAllById(requestIds);
+
+        // Каждая заявка должна существовать и относиться к этому событию.
+        if (requests.size() != requestIds.stream().distinct().count()
+                || requests.stream().anyMatch(
+                r -> !r.getEventId().equals(eventId))) {
+            throw new NotFoundException(
+                    "Одна или несколько заявок не найдены для события: " + eventId
+            );
+        }
+
+        if (requests.stream().anyMatch(
+                r -> r.getStatus() != ParticipationStatus.PENDING)) {
+            throw new ConflictException(
+                    "Статус можно изменить только у заявок, находящихся в состоянии ожидания"
+            );
+        }
+
+        List<ParticipationRequest> confirmed = new ArrayList<>();
+        List<ParticipationRequest> rejected = new ArrayList<>();
+
+        if (targetStatus == ParticipationStatus.REJECTED) {
+            requests.forEach(r -> {
+                r.setStatus(ParticipationStatus.REJECTED);
+                rejected.add(r);
+            });
+
+            requestRepository.saveAll(rejected);
+        } else {
+            Integer limit = request.getParticipantLimit();
+
+            if (limit == null || limit == 0) {
+                requests.forEach(r -> {
+                    r.setStatus(ParticipationStatus.CONFIRMED);
+                    confirmed.add(r);
+                });
+            } else {
+                long alreadyConfirmed = requestRepository.countByEventIdAndStatus(
+                        eventId,
+                        ParticipationStatus.CONFIRMED
+                );
+
+                long available = limit - alreadyConfirmed;
+
+                if (available <= 0) {
+                    throw new ConflictException(
+                            "Достигнут лимит по заявкам на данное событие"
+                    );
+                }
+
+                for (ParticipationRequest participationRequest : requests) {
+                    if (available > 0) {
+                        participationRequest.setStatus(
+                                ParticipationStatus.CONFIRMED
+                        );
+                        confirmed.add(participationRequest);
+                        available--;
+                    } else {
+                        participationRequest.setStatus(
+                                ParticipationStatus.REJECTED
+                        );
+                        rejected.add(participationRequest);
+                    }
+                }
+            }
+
+            requestRepository.saveAll(requests);
+
+            // Если лимит достигнут, отклоняем оставшиеся ожидающие заявки.
+            if (limit != null && limit > 0) {
+                long totalConfirmed = requestRepository.countByEventIdAndStatus(
+                        eventId,
+                        ParticipationStatus.CONFIRMED
+                );
+
+                if (totalConfirmed >= limit) {
+                    List<ParticipationRequest> pending =
+                            requestRepository.findAllByEventIdAndStatus(
+                                    eventId,
+                                    ParticipationStatus.PENDING
+                            );
+
+                    pending.forEach(r ->
+                            r.setStatus(ParticipationStatus.REJECTED));
+
+                    requestRepository.saveAll(pending);
+                }
+            }
+        }
+
+        return EventRequestStatusUpdateResult.builder()
+                .confirmedRequests(confirmed.stream()
+                        .map(requestMapper::toDto)
+                        .toList())
+                .rejectedRequests(rejected.stream()
+                        .map(requestMapper::toDto)
+                        .toList())
+                .build();
     }
 }

@@ -9,4 +9,5 @@ import java.util.List;
 public class EventRequestStatusUpdateRequest {
     List<Long> requestIds;
     ParticipationStatus status;
+    private Integer participantLimit;
 }
