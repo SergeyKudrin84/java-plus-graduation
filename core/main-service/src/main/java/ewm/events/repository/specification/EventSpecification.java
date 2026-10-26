@@ -120,7 +120,7 @@ public class EventSpecification {
             if (users == null || users.isEmpty()) {
                 return cb.conjunction();
             }
-            return root.get("initiator").get("id").in(users);
+            return root.get("initiatorId").in(users);
         };
     }
 

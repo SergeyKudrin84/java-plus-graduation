@@ -87,7 +87,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
             request.setStatus(ParticipationStatus.PENDING);
         }
 
-        //request.setRequester(user);
+        request.setRequesterId(userId);
         request.setEvent(event);
         request.setCreated(LocalDateTime.now());
 
