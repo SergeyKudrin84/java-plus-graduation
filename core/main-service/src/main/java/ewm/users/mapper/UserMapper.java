@@ -1,22 +1,12 @@
 package ewm.users.mapper;
 
+import ewm.users.client.dto.UserResponseDto;
 import org.mapstruct.Mapper;
-import ewm.users.dto.NewUserRequest;
-import ewm.users.dto.UserDto;
-import ewm.users.dto.UserShortDto;
-import ewm.users.model.User;
-import org.mapstruct.Mapping;
-
-import java.util.List;
+import ewm.users.client.dto.UserShortDto;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-    UserDto toUserDto(User user);
 
-    UserShortDto toUserShortDto(User user);
+    UserShortDto toUserShortDto(UserResponseDto userResponseDto);
 
-    @Mapping(target = "id", ignore = true)
-    User toUser(NewUserRequest newUserRequest);
-
-    List<UserDto> toUserDtoList(List<User> users);
 }

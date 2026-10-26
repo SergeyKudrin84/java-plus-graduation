@@ -8,8 +8,6 @@ import ewm.events.dto.LocationDto;
 import ewm.events.dto.NewEventDto;
 import ewm.events.model.Event;
 import ewm.events.model.Location;
-import ewm.users.dto.UserShortDto;
-import ewm.users.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -35,7 +33,9 @@ public interface EventMapper {
     @Mapping(target = "confirmedRequests", ignore = true)
     EventShortDto toEventShortDto(Event event);
 
+    @Mapping(target = "initiator", ignore = true)
     List<EventFullDto> toEventFullDtoList(List<Event> events);
+    @Mapping(target = "initiator", ignore = true)
     List<EventShortDto> toEventShortDtoList(List<Event> events);
 
     CategoryDto toCategoryDto(Category category);

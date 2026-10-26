@@ -8,8 +8,6 @@ import ewm.participationRequest.model.ParticipationRequest;
 import ewm.participationRequest.model.ParticipationStatus;
 import ewm.users.client.UserClient;
 import ewm.users.client.dto.UserResponseDto;
-import ewm.users.model.User;
-import ewm.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

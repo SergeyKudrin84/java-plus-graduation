@@ -30,6 +30,8 @@ import ewm.participationRequest.model.ParticipationStatus;
 import ewm.participationRequest.repository.ParticipationRequestsRepository;
 import ewm.users.client.UserClient;
 import ewm.users.client.dto.UserResponseDto;
+import ewm.users.client.dto.UserShortDto;
+import ewm.users.mapper.UserMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -56,6 +58,7 @@ public class EventsServiceImpl implements EventsService {
     private final ObjectMapper objectMapper;
     private final CategoryRepository categoryRepository;
     private final UserClient userClient;
+    private final UserMapper userMapper;
     private final ParticipationRequestsRepository participationRequestsRepository;
     private final ParticipationRequestMapper participationRequestMapper;
 
@@ -127,6 +130,7 @@ public class EventsServiceImpl implements EventsService {
         }
 
         List<EventFullDto> eventFullDtoList = eventMapper.toEventFullDtoList(page.getContent());
+        enrichEventFullDtosWithInitiators(events, eventFullDtoList);
         enrichEventFullDtosWithStats(eventFullDtoList);
 
         return eventFullDtoList;
@@ -145,6 +149,7 @@ public class EventsServiceImpl implements EventsService {
         sendHitToStats("/events/" + id, request.getRemoteAddr());
 
         EventFullDto dto = eventMapper.toEventFullDto(event);
+        enrichEventFullDtoWithInitiator(event, dto);
         enrichEventWithStats(dto);
 
         return dto;
@@ -168,6 +173,7 @@ public class EventsServiceImpl implements EventsService {
         event = eventsRepository.save(event);
 
         EventFullDto result = eventMapper.toEventFullDto(event);
+        enrichEventFullDtoWithInitiator(event, result);
         result.setViews(0L);
         result.setConfirmedRequests(0L);
 
@@ -181,6 +187,7 @@ public class EventsServiceImpl implements EventsService {
                 .orElseThrow(() -> new NotFoundException("Event с id=" + params.getEventId() + " не найден"));
 
         EventFullDto dto = eventMapper.toEventFullDto(event);
+        enrichEventFullDtoWithInitiator(event, dto);
         enrichEventWithStats(dto);
 
         return dto;
@@ -206,6 +213,7 @@ public class EventsServiceImpl implements EventsService {
         }
 
         List<EventShortDto> dtos = eventMapper.toEventShortDtoList(events);
+        enrichEventShortDtosWithInitiators(events, dtos);
         enrichEventsWithStats(dtos);
 
         return dtos;
@@ -222,6 +230,7 @@ public class EventsServiceImpl implements EventsService {
         event = eventsRepository.save(event);
 
         EventFullDto result = eventMapper.toEventFullDto(event);
+        enrichEventFullDtoWithInitiator(event, result);
         enrichEventWithStats(result);
 
         return result;
@@ -272,6 +281,7 @@ public class EventsServiceImpl implements EventsService {
         event = eventsRepository.save(event);
 
         EventFullDto result = eventMapper.toEventFullDto(event);
+        enrichEventFullDtoWithInitiator(event, result);
         enrichEventWithStats(result);
 
         return result;
@@ -584,6 +594,7 @@ public class EventsServiceImpl implements EventsService {
         }
 
         List<EventShortDto> dtos = eventMapper.toEventShortDtoList(events);
+        enrichEventShortDtosWithInitiators(events, dtos);
         enrichEventsWithStats(dtos);
 
         return dtos;
@@ -597,6 +608,7 @@ public class EventsServiceImpl implements EventsService {
         }
 
         List<EventShortDto> dtos = eventMapper.toEventShortDtoList(allEvents);
+        enrichEventShortDtosWithInitiators(allEvents, dtos);
         enrichEventsWithStats(dtos);
 
         dtos.sort(Comparator.comparing(EventShortDto::getViews).reversed());
@@ -618,5 +630,96 @@ public class EventsServiceImpl implements EventsService {
         if (users.isEmpty()) {
             throw new NotFoundException("Пользователь с id=" + userId + " не найден");
         }
+    }
+
+    private Map<Long, UserShortDto> getInitiatorsByIds(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        return userClient.getUsersByIds(
+                        userIds.stream()
+                                .distinct()
+                                .toList()
+                ).stream()
+                .collect(Collectors.toMap(
+                        UserResponseDto::getId,
+                        userMapper::toUserShortDto
+                ));
+    }
+
+    private void enrichEventFullDtoWithInitiator(Event event, EventFullDto dto) {
+        Map<Long, UserShortDto> initiators =
+                getInitiatorsByIds(List.of(event.getInitiatorId()));
+
+        dto.setInitiator(getInitiatorOrThrow(
+                initiators,
+                event.getInitiatorId()
+        ));
+    }
+
+    private void enrichEventFullDtosWithInitiators(
+            List<Event> events,
+            List<EventFullDto> dtos
+    ) {
+        Map<Long, UserShortDto> initiators = getInitiatorsByIds(
+                events.stream()
+                        .map(Event::getInitiatorId)
+                        .distinct()
+                        .toList()
+        );
+
+        Map<Long, Long> initiatorIdsByEventId = events.stream()
+                .collect(Collectors.toMap(
+                        Event::getId,
+                        Event::getInitiatorId
+                ));
+
+        dtos.forEach(dto -> dto.setInitiator(
+                getInitiatorOrThrow(
+                        initiators,
+                        initiatorIdsByEventId.get(dto.getId())
+                )
+        ));
+    }
+
+    private void enrichEventShortDtosWithInitiators(
+            List<Event> events,
+            List<EventShortDto> dtos
+    ) {
+        Map<Long, UserShortDto> initiators = getInitiatorsByIds(
+                events.stream()
+                        .map(Event::getInitiatorId)
+                        .distinct()
+                        .toList()
+        );
+
+        Map<Long, Long> initiatorIdsByEventId = events.stream()
+                .collect(Collectors.toMap(
+                        Event::getId,
+                        Event::getInitiatorId
+                ));
+
+        dtos.forEach(dto -> dto.setInitiator(
+                getInitiatorOrThrow(
+                        initiators,
+                        initiatorIdsByEventId.get(dto.getId())
+                )
+        ));
+    }
+
+    private UserShortDto getInitiatorOrThrow(
+            Map<Long, UserShortDto> initiators,
+            Long initiatorId
+    ) {
+        UserShortDto initiator = initiators.get(initiatorId);
+
+        if (initiator == null) {
+            throw new NotFoundException(
+                    "Инициатор с id=" + initiatorId + " не найден в user-service"
+            );
+        }
+
+        return initiator;
     }
 }

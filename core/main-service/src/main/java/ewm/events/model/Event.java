@@ -34,7 +34,7 @@ public class Event {
     @Column(name = "event_date", nullable = false)
     private LocalDateTime eventDate;
 
-    @JoinColumn(name = "initiator_id", nullable = false)
+    @Column(name = "initiator_id", nullable = false)
     private Long initiatorId;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
