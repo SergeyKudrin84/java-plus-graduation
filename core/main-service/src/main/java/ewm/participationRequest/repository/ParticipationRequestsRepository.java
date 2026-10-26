@@ -4,7 +4,7 @@ import ewm.events.model.Event;
 import ewm.participationRequest.dto.EventRequestsCountDto;
 import ewm.participationRequest.model.ParticipationRequest;
 import ewm.participationRequest.model.ParticipationStatus;
-import ewm.users.model.User;
+//import ewm.users.model.User;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -28,23 +28,23 @@ public interface ParticipationRequestsRepository
             """)
     List<EventRequestsCountDto> getConfirmedRequests(@Param("eventIds") List<Long> eventIds);
 
-    @EntityGraph(attributePaths = {"requester", "event", "event.initiator"})
-    List<ParticipationRequest> findAllByRequester_Id(Long requesterId);
+    @EntityGraph(attributePaths = {"event"})
+    List<ParticipationRequest> findAllByRequesterId(Long requesterId);
 
-    @EntityGraph(attributePaths = {"requester", "event", "event.initiator"})
-    Optional<ParticipationRequest> findByIdAndRequester_Id(Long id, Long requesterId);
+    @EntityGraph(attributePaths = {"event"})
+    Optional<ParticipationRequest> findByIdAndRequesterId(Long id, Long requesterId);
 
-    boolean existsByRequester_IdAndEvent_Id(Long requesterId, Long eventId);
+    boolean existsByRequesterIdAndEventId(Long requesterId, Long eventId);
 
     long countByEventIdAndStatus(Long eventId, ParticipationStatus status);
 
     //@EntityGraph(attributePaths = {"requester", "event", "event.initiator"})
-    List<ParticipationRequest> findByRequester(User requester);
+    List<ParticipationRequest> findByRequesterId(Long requesterId);
 
     //@EntityGraph(attributePaths = {"requester", "event", "event.initiator"})
     Long countByEventAndStatus(Event event, ParticipationStatus status);
 
-    boolean existsByRequesterAndEvent(User requester, Event event);
+    //boolean existsByRequesterAndEvent(User requester, Event event);
 
     List<ParticipationRequest> findAllByEventId(Long eventId);
 

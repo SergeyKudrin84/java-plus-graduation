@@ -1,7 +1,6 @@
 package ewm.events.model;
 
 import ewm.categories.model.Category;
-import ewm.users.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -35,9 +34,8 @@ public class Event {
     @Column(name = "event_date", nullable = false)
     private LocalDateTime eventDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "initiator_id", nullable = false)
-    private User initiator;
+    private Long initiatorId;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "location_id", nullable = false)

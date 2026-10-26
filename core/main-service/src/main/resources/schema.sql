@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS categories CASCADE;
 DROP TABLE IF EXISTS events CASCADE;
 DROP TABLE IF EXISTS compilations CASCADE;
@@ -6,12 +5,12 @@ DROP TABLE IF EXISTS compilation_events CASCADE;
 DROP TABLE IF EXISTS participation_requests CASCADE;
 DROP TABLE IF EXISTS locations CASCADE;
 
-CREATE TABLE IF NOT EXISTS users (
-    id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name  VARCHAR(250) NOT NULL,
-    email VARCHAR(254) NOT NULL,
-    CONSTRAINT uq_email UNIQUE (email)
-);
+-- CREATE TABLE IF NOT EXISTS users (
+--     id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+--     name  VARCHAR(250) NOT NULL,
+--     email VARCHAR(254) NOT NULL,
+--     CONSTRAINT uq_email UNIQUE (email)
+-- );
 
 CREATE TABLE IF NOT EXISTS categories (
     id   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -32,7 +31,8 @@ CREATE TABLE IF NOT EXISTS events (
     created_on TIMESTAMP NOT NULL,
     description VARCHAR(7000) NOT NULL,
     event_date TIMESTAMP NOT NULL,
-    initiator_id BIGINT NOT NULL REFERENCES users(id),
+--     initiator_id BIGINT NOT NULL REFERENCES users(id),
+    initiator_id BIGINT NOT NULL,
     location_id BIGINT NOT NULL REFERENCES locations(id),
     paid BOOLEAN DEFAULT FALSE,
     participant_limit INT DEFAULT 0,
@@ -40,8 +40,8 @@ CREATE TABLE IF NOT EXISTS events (
     request_moderation BOOLEAN DEFAULT TRUE,
     state VARCHAR(20) NOT NULL,
     title VARCHAR(120) NOT NULL,
-    CONSTRAINT fk_event_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
-    CONSTRAINT fk_event_initiator FOREIGN KEY (initiator_id) REFERENCES users(id) ON DELETE CASCADE
+    CONSTRAINT fk_event_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
+--     CONSTRAINT fk_event_initiator FOREIGN KEY (initiator_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS compilations (
@@ -64,9 +64,9 @@ CREATE TABLE IF NOT EXISTS participation_requests (
     event_id BIGINT NOT NULL,
     created TIMESTAMP NOT NULL,
     status VARCHAR(20) NOT NULL,
-    CONSTRAINT fk_requests_event FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
-    CONSTRAINT fk_requests_requester FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE CASCADE
+    CONSTRAINT fk_requests_event FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
+--     CONSTRAINT fk_requests_requester FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
+-- CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
 CREATE INDEX IF NOT EXISTS idx_categories_name ON categories (name);

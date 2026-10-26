@@ -24,9 +24,8 @@ public interface EventMapper {
     @Mapping(target = "state", ignore = true)
     @Mapping(target = "eventDate", ignore = true)
     @Mapping(target = "category", source = "category")
-    @Mapping(target = "initiator", source = "initiator")
     @Mapping(target = "location", source = "dto.location")
-    Event toEvent(NewEventDto dto, Category category, User initiator);
+    Event toEvent(NewEventDto dto, Category category, Long initiatorId);
 
     @Mapping(target = "views", ignore = true)
     @Mapping(target = "confirmedRequests", ignore = true)
@@ -40,7 +39,7 @@ public interface EventMapper {
     List<EventShortDto> toEventShortDtoList(List<Event> events);
 
     CategoryDto toCategoryDto(Category category);
-    UserShortDto toUserShortDto(User user);
+    //UserShortDto toUserShortDto(User user);
 
     LocationDto toLocationDto(Location location);
 

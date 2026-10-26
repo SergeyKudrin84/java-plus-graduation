@@ -1,4 +1,23 @@
 services:
+  postgres:
+    image: postgres:16.1
+    container_name: postgres
+    hostname: postgres
+    environment:
+      POSTGRES_USER: dbuser
+      POSTGRES_PASSWORD: 12345
+    volumes:
+      - ./docker/init-databases.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
+    #    volumes:
+    #      - postgres:/data/postgres
+    ports:
+      - "6501:5432"
+
 #  stats-server:
 #    ports:
 #      - "9090:9090"
@@ -14,24 +33,24 @@ services:
 #    networks:
 #      - app-network
 
-  stats-db:
-    image: postgres:16.1
-    container_name: stats-db
-    ports:
-      - "6501:5432"
-    environment:
-      - POSTGRES_PASSWORD=12345
-      - POSTGRES_USER=dbuser
-      - POSTGRES_DB=stats
-    volumes:
-      - ./stats/stats-server/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
-    healthcheck:
-      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
-      timeout: 5s
-      interval: 5s
-      retries: 10
-    networks:
-      - app-network
+#  stats-db:
+#    image: postgres:16.1
+#    container_name: stats-db
+#    ports:
+#      - "6501:5432"
+#    environment:
+#      - POSTGRES_PASSWORD=12345
+#      - POSTGRES_USER=dbuser
+#      - POSTGRES_DB=stats
+#    volumes:
+#      - ./stats/stats-server/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+#    healthcheck:
+#      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+#      timeout: 5s
+#      interval: 5s
+#      retries: 10
+#    networks:
+#      - app-network
 
 #  ewm-service:
 #    ports:
@@ -50,25 +69,25 @@ services:
 #    networks:
 #      - app-network
 
-  ewm-db:
-    image: postgres:16.1
-    container_name: ewm-db
-    ports:
-      - "6502:5432"
-    environment:
-      - POSTGRES_PASSWORD=12345
-      - POSTGRES_USER=dbuser
-      - POSTGRES_DB=ewm
-    volumes:
-      - ./main-service/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
-    healthcheck:
-      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
-      timeout: 5s
-      interval: 5s
-      retries: 10
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
+#  ewm-db:
+#    image: postgres:16.1
+#    container_name: ewm-db
+#    ports:
+#      - "6502:5432"
+#    environment:
+#      - POSTGRES_PASSWORD=12345
+#      - POSTGRES_USER=dbuser
+#      - POSTGRES_DB=ewm
+#    volumes:
+#      - ./main-service/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+#    healthcheck:
+#      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+#      timeout: 5s
+#      interval: 5s
+#      retries: 10
+#    networks:
+#      - app-network
+#
+#networks:
+#  app-network:
+#    driver: bridge

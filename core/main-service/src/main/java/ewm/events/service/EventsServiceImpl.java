@@ -28,8 +28,8 @@ import ewm.participationRequest.mapper.ParticipationRequestMapper;
 import ewm.participationRequest.model.ParticipationRequest;
 import ewm.participationRequest.model.ParticipationStatus;
 import ewm.participationRequest.repository.ParticipationRequestsRepository;
-import ewm.users.model.User;
-import ewm.users.repository.UserRepository;
+import ewm.users.client.UserClient;
+import ewm.users.client.dto.UserResponseDto;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -55,7 +55,7 @@ public class EventsServiceImpl implements EventsService {
     private final StatsClient statsClient;
     private final ObjectMapper objectMapper;
     private final CategoryRepository categoryRepository;
-    private final UserRepository userRepository;
+    private final UserClient userClient;
     private final ParticipationRequestsRepository participationRequestsRepository;
     private final ParticipationRequestMapper participationRequestMapper;
 
@@ -152,7 +152,7 @@ public class EventsServiceImpl implements EventsService {
 
     @Override
     public EventFullDto createEvent(Long userId, NewEventDto dto) {
-        User user = getUserOrThrow(userId);
+        checkUserExists(userId);
         Category category = getCategoryOrThrow(dto.getCategory());
 
         LocalDateTime eventDate = parseAndValidateEventDate(
@@ -160,7 +160,7 @@ public class EventsServiceImpl implements EventsService {
                 "Дата события должна быть не ранее чем через 2 часа от текущего момента"
         );
 
-        Event event = eventMapper.toEvent(dto, category, user);
+        Event event = eventMapper.toEvent(dto, category, userId);
         event.setCreatedOn(LocalDateTime.now());
         event.setState(State.PENDING);
         event.setEventDate(eventDate);
@@ -190,7 +190,7 @@ public class EventsServiceImpl implements EventsService {
     @Override
     @Transactional(readOnly = true)
     public List<EventShortDto> getUserEvents(Long userId, PaginationParams params, HttpServletRequest request) {
-        getUserOrThrow(userId);
+        checkUserExists(userId);
 
         sendHitToStats("/users/" + userId + "/events", request.getRemoteAddr());
 
@@ -500,11 +500,6 @@ public class EventsServiceImpl implements EventsService {
         return eventDate;
     }
 
-    private User getUserOrThrow(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User с id=" + userId + " не найден"));
-    }
-
     private Category getCategoryOrThrow(Long categoryId) {
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundException("Category с id=" + categoryId + " не найдена"));
@@ -615,5 +610,13 @@ public class EventsServiceImpl implements EventsService {
 
         int toIndex = Math.min(from + size, dtos.size());
         return dtos.subList(from, toIndex);
+    }
+
+    private void checkUserExists(Long userId) {
+        List<UserResponseDto> users = userClient.getUsersByIds(List.of(userId));
+
+        if (users.isEmpty()) {
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
+        }
     }
 }
