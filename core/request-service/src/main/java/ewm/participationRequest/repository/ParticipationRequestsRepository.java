@@ -3,8 +3,6 @@ package ewm.participationRequest.repository;
 import ewm.participationRequest.dto.EventRequestsCountDto;
 import ewm.participationRequest.model.ParticipationRequest;
 import ewm.participationRequest.model.ParticipationStatus;
-//import ewm.users.model.User;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

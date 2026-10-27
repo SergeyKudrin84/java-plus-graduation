@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @FeignClient(
-        name = "main-service",
+        name = "request-service",
         contextId = "participationRequestClient",
         path = "/internal/requests",
         fallbackFactory = ParticipationRequestClientFallbackFactory.class

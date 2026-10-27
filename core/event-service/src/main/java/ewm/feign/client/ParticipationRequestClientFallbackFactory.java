@@ -11,11 +11,6 @@ import org.springframework.cloud.openfeign.FallbackFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.FeignException;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,13 +24,13 @@ public class ParticipationRequestClientFallbackFactory
 
     @Override
     public ParticipationRequestClient create(Throwable cause) {
-        log.error("Не удалось обратиться к main-service для работы с заявками", cause);
+        log.error("Не удалось обратиться к request-service для работы с заявками", cause);
 
         return new ParticipationRequestClient() {
             private ResponseStatusException unavailable() {
                 return new ResponseStatusException(
                         HttpStatus.SERVICE_UNAVAILABLE,
-                        "main-service временно недоступен",
+                        "request-service временно недоступен",
                         cause
                 );
             }
