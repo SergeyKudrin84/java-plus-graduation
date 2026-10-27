@@ -26,5 +26,4 @@ spring:
         - id: compilation-service
           uri: lb://compilation-service
           predicates:
-            predicates:
-              - Path=/categories,/categories/**,/admin/categories,/admin/categories/**,/compilations,/compilations/**,/admin/compilations,/admin/compilations/**
+            - Path=/categories,/categories/**,/admin/categories,/admin/categories/**,/compilations,/compilations/**,/admin/compilations,/admin/compilations/**
