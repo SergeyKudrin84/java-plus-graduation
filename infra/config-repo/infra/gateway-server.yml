@@ -23,7 +23,7 @@ spring:
           predicates:
             - Path=/users/{userId}/requests,/users/{userId}/requests/**
 
-        - id: main-service
-          uri: lb://main-service
+        - id: compilation-service
+          uri: lb://compilation-service
           predicates:
             - Path=/**

@@ -8,8 +8,8 @@ import org.springframework.context.annotation.ComponentScan;
 @EnableFeignClients(basePackages = "ewm.feign.client")
 @SpringBootApplication
 @ComponentScan(value = {"ewm", "client"})
-public class MainServiceApplication {
+public class CompilationServiceApplication {
     public static void main(String[] args) {
-        SpringApplication.run(MainServiceApplication.class, args);
+        SpringApplication.run(CompilationServiceApplication.class, args);
     }
 }
