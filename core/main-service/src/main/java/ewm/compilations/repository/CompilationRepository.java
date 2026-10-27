@@ -13,16 +13,15 @@ import java.util.Optional;
 public interface CompilationRepository extends JpaRepository<Compilation, Long> {
 
     @Override
-    @EntityGraph(attributePaths = "events")
+    @EntityGraph(attributePaths = "eventIds")
     Optional<Compilation> findById(Long id);
 
-    @EntityGraph(attributePaths = "events")
+    @EntityGraph(attributePaths = "eventIds")
     List<Compilation> findAll();
 
     @Query("""
         SELECT c
         FROM Compilation c
-        LEFT JOIN FETCH c.events
         WHERE (:pinned IS NULL OR c.pinned = :pinned)
     """)
     List<Compilation> findAllByPinned(@Param("pinned") Boolean pinned, Pageable pageable);

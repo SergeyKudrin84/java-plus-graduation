@@ -9,6 +9,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -125,5 +126,25 @@ public class ErrorHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiError> handleResponseStatusException(
+            ResponseStatusException ex
+    ) {
+        HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
+
+        log.warn("Request failed with status {}: {}", status.value(), ex.getReason());
+
+        ApiError error = ApiError.builder()
+                .status(status.name())
+                .reason(status == HttpStatus.CONFLICT
+                        ? "For the requested operation the conditions are not met."
+                        : status.getReasonPhrase())
+                .message(ex.getReason())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(status).body(error);
     }
 }

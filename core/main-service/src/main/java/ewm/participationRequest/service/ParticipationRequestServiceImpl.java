@@ -1,8 +1,9 @@
 package ewm.participationRequest.service;
 
-import ewm.events.model.Event;
 import ewm.exception.ConflictException;
 import ewm.exception.ValidationException;
+import ewm.feign.client.EventClient;
+import ewm.feign.client.dto.EventRequestInfoDto;
 import ewm.participationRequest.dto.EventRequestStatusUpdateRequest;
 import ewm.participationRequest.dto.EventRequestStatusUpdateResult;
 import ewm.participationRequest.dto.EventRequestsCountDto;
@@ -12,13 +13,12 @@ import ewm.participationRequest.model.ParticipationStatus;
 import ewm.feign.client.UserClient;
 import ewm.feign.client.dto.UserResponseDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ewm.exception.NotFoundException;
 import ewm.participationRequest.repository.ParticipationRequestsRepository;
 import ewm.participationRequest.mapper.ParticipationRequestMapper;
-import ewm.events.repository.EventsRepository;
-import ewm.events.model.State;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,6 +27,7 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class ParticipationRequestServiceImpl implements ParticipationRequestService {
     private static final String USER_NOT_FOUND = "Пользователь не найден: user_id = ";
     private static final String EVENT_NOT_FOUND = "Событие не найдено: event_id = ";
@@ -38,7 +39,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     private static final String CANCEL_YOUR_REQUEST = "Можно отменить только свою заявку";
 
     private final UserClient userClient;
-    private final EventsRepository eventRepository;
+    private final EventClient eventClient;
     private final ParticipationRequestsRepository requestRepository;
     private final ParticipationRequestMapper requestMapper;
 
@@ -62,9 +63,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     public ParticipationRequestDto addParticipationRequest(Long userId, Long eventId) {
         checkUserExists(userId);
 
-        Event event = eventRepository.findById(eventId).orElseThrow(
-            () -> new NotFoundException(EVENT_NOT_FOUND + eventId)
-        );
+        EventRequestInfoDto event = eventClient.getRequestInfo(eventId);
 
         ParticipationRequest request = new ParticipationRequest();
         Long confirmedRequests = requestRepository.countByEventIdAndStatus(eventId, ParticipationStatus.CONFIRMED);
@@ -77,7 +76,8 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
             throw new ConflictException(REQUEST_YOUR_EVENT);
         }
 
-        if (!event.getState().equals(State.PUBLISHED)) {
+        //if (!event.getState().equals(ParticipationStatus.State.PUBLISHED)) {
+        if (!"PUBLISHED".equals(event.getState())) {
             throw new ConflictException(EVENT_NOT_PUBLISHED);
         }
 
@@ -130,6 +130,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Override
     public List<EventRequestsCountDto> getConfirmedRequests(List<Long> eventIds) {
         if (eventIds == null || eventIds.isEmpty()) {
+            log.info("getConfirmedRequests: получен пустой список eventIds");
             return List.of();
         }
 

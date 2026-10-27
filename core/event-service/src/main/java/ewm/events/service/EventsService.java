@@ -36,4 +36,6 @@ public interface EventsService {
                                                        EventRequestStatusUpdateRequest request);
 
     EventRequestInfoDto getRequestInfo(Long eventId);
+
+    List<EventShortDto> getEventsByIds(List<Long> eventIds);
 }

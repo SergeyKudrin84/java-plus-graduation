@@ -22,8 +22,8 @@ public interface ParticipationRequestsRepository
             )
             from ParticipationRequest r
             where r.status = ewm.participationRequest.model.ParticipationStatus.CONFIRMED
-              and r.event.id in :eventIds
-            group by r.event.id
+              and r.eventId in :eventIds
+            group by r.eventId
             """)
     List<EventRequestsCountDto> getConfirmedRequests(@Param("eventIds") List<Long> eventIds);
 

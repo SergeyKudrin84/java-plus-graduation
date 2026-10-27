@@ -1,6 +1,6 @@
 package ewm.compilations.dto;
 
-import ewm.events.dto.EventShortDto;
+import ewm.feign.client.dto.EventRequestInfoDto;
 import lombok.Data;
 
 import java.util.List;
@@ -14,5 +14,5 @@ public class CompilationDto {
 
     private Boolean pinned;
 
-    private List<EventShortDto> events;
+    private List<EventRequestInfoDto> events;
 }

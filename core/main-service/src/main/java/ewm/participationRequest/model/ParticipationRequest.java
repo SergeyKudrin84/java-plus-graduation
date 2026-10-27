@@ -1,6 +1,5 @@
 package ewm.participationRequest.model;
 
-import ewm.events.model.Event;
 import jakarta.persistence.*;
 import lombok.*;
 

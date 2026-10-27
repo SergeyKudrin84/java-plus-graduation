@@ -11,6 +11,7 @@ import java.util.List;
 
 @FeignClient(
         name = "main-service",
+        contextId = "participationRequestClient",
         path = "/internal/requests",
         fallbackFactory = ParticipationRequestClientFallbackFactory.class
 )

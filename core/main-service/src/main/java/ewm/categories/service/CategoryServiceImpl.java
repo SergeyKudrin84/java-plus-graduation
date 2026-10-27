@@ -5,11 +5,10 @@ import ewm.categories.dto.NewCategoryDto;
 import ewm.categories.mapper.CategoryMapper;
 import ewm.categories.model.Category;
 import ewm.categories.repository.CategoryRepository;
-import ewm.events.repository.EventsRepository;
 import ewm.exception.ConflictException;
 import ewm.exception.NotFoundException;
+import ewm.feign.client.EventClient;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +22,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
-    private final EventsRepository eventRepository;
+    private final EventClient eventClient;
 
     @Override
     public CategoryDto createCategory(NewCategoryDto newCategoryDto) {
@@ -55,7 +54,7 @@ public class CategoryServiceImpl implements CategoryService {
             throw new NotFoundException("Категория с id=" + catId + " не найдена");
         }
 
-        if (eventRepository.existsByCategory_Id(catId)) {
+        if (eventClient.existsByCategoryId(catId)) {
             throw new ConflictException("Категория с id=" + catId +" используется в событиях.");
         }
 

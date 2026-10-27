@@ -54,8 +54,7 @@ CREATE TABLE IF NOT EXISTS compilation_events (
     compilation_id BIGINT NOT NULL,
     event_id BIGINT NOT NULL,
     PRIMARY KEY (compilation_id, event_id),
-    CONSTRAINT fk_ce_compilation FOREIGN KEY (compilation_id) REFERENCES compilations(id) ON DELETE CASCADE,
-    CONSTRAINT fk_ce_event FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
+    CONSTRAINT fk_ce_compilation FOREIGN KEY (compilation_id) REFERENCES compilations(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS participation_requests (
@@ -63,8 +62,8 @@ CREATE TABLE IF NOT EXISTS participation_requests (
     requester_id BIGINT NOT NULL,
     event_id BIGINT NOT NULL,
     created TIMESTAMP NOT NULL,
-    status VARCHAR(20) NOT NULL,
-    CONSTRAINT fk_requests_event FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
+    status VARCHAR(20) NOT NULL
+ --   CONSTRAINT fk_requests_event FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
 --     CONSTRAINT fk_requests_requester FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
