@@ -11,6 +11,7 @@ import java.util.List;
 
 @FeignClient(
         name = "event-service",
+        contextId = "eventCompilationClient",
         path = "/internal/events"
 )
 public interface EventClient {
