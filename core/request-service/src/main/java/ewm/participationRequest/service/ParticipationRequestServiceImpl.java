@@ -76,7 +76,6 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
             throw new ConflictException(REQUEST_YOUR_EVENT);
         }
 
-        //if (!event.getState().equals(ParticipationStatus.State.PUBLISHED)) {
         if (!"PUBLISHED".equals(event.getState())) {
             throw new ConflictException(EVENT_NOT_PUBLISHED);
         }
