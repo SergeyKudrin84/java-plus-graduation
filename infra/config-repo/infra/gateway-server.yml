@@ -27,3 +27,8 @@ spring:
           uri: lb://compilation-service
           predicates:
             - Path=/categories,/categories/**,/admin/categories,/admin/categories/**,/compilations,/compilations/**,/admin/compilations,/admin/compilations/**
+
+        - id: stats-server
+          uri: lb://stats-server
+          predicates:
+            - Path=/hit,/hit/**,/stats,/stats/**
