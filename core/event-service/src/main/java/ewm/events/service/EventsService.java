@@ -38,4 +38,6 @@ public interface EventsService {
     EventRequestInfoDto getRequestInfo(Long eventId);
 
     List<EventShortDto> getEventsByIds(List<Long> eventIds);
+
+    boolean existsByCategoryId(Long categoryId);
 }

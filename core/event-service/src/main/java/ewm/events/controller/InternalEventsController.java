@@ -15,7 +15,6 @@ import java.util.List;
 public class InternalEventsController {
 
     private final EventsService eventsService;
-    private final EventsRepository eventsRepository;
 
     @GetMapping("/{eventId}/request-info")
     public EventRequestInfoDto getRequestInfo(
@@ -26,7 +25,7 @@ public class InternalEventsController {
 
     @GetMapping("/categories/{catId}/exists")
     public boolean existsByCategoryId(@PathVariable Long catId) {
-        return eventsRepository.existsByCategoryId(catId);
+        return eventsService.existsByCategoryId(catId);
     }
 
     @PostMapping("/by-ids")

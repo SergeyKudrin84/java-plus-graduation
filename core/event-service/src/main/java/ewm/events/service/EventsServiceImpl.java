@@ -804,4 +804,10 @@ public class EventsServiceImpl implements EventsService {
 
         return dtos;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existsByCategoryId(Long categoryId) {
+        return eventsRepository.existsByCategoryId(categoryId);
+    }
 }
