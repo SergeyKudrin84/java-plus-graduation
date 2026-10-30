@@ -13,81 +13,45 @@ services:
       timeout: 5s
       interval: 5s
       retries: 10
-    #    volumes:
-    #      - postgres:/data/postgres
     ports:
       - "6501:5432"
 
-#  stats-server:
-#    ports:
-#      - "9090:9090"
-#    build: ./stats/stats-server
-#    image: stats-server
-#    container_name: stats-server
-#    depends_on:
-#      - stats-db
-#    environment:
-#      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/stats
-#      - SPRING_DATASOURCE_USERNAME=dbuser
-#      - SPRING_DATASOURCE_PASSWORD=12345
-#    networks:
-#      - app-network
+  kafka:
+    image: confluentinc/confluent-local:7.4.3
+    hostname: kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+      - "9101:9101"
+    restart: unless-stopped
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      CLUSTER_ID: 'K0EA9p0yEe6MkAAAAkKsEg'
+    healthcheck:
+      test: kafka-topics --bootstrap-server kafka:29092 --list
+      interval: 5s
+      timeout: 10s
+      retries: 20
 
-#  stats-db:
-#    image: postgres:16.1
-#    container_name: stats-db
-#    ports:
-#      - "6501:5432"
-#    environment:
-#      - POSTGRES_PASSWORD=12345
-#      - POSTGRES_USER=dbuser
-#      - POSTGRES_DB=stats
-#    volumes:
-#      - ./stats/stats-server/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
-#    healthcheck:
-#      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
-#      timeout: 5s
-#      interval: 5s
-#      retries: 10
-#    networks:
-#      - app-network
-
-#  ewm-service:
-#    ports:
-#      - "8080:8080"
-#    build: ./main-service
-#    image: main-service
-#    container_name: main-service
-#    depends_on:
-#      - ewm-db
-#      - stats-server
-#    environment:
-#      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm
-#      - SPRING_DATASOURCE_USERNAME=dbuser
-#      - SPRING_DATASOURCE_PASSWORD=12345
-#      - STATS_SERVER_URL=http://stats-server:9090
-#    networks:
-#      - app-network
-
-#  ewm-db:
-#    image: postgres:16.1
-#    container_name: ewm-db
-#    ports:
-#      - "6502:5432"
-#    environment:
-#      - POSTGRES_PASSWORD=12345
-#      - POSTGRES_USER=dbuser
-#      - POSTGRES_DB=ewm
-#    volumes:
-#      - ./main-service/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
-#    healthcheck:
-#      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
-#      timeout: 5s
-#      interval: 5s
-#      retries: 10
-#    networks:
-#      - app-network
-#
-#networks:
-#  app-network:
-#    driver: bridge
+  kafka-init-topics:
+    image: confluentinc/confluent-local:7.4.3
+    container_name: kafka-init-topics
+    depends_on:
+      kafka:
+        condition: service_healthy
+    command: >
+      bash -c "
+        kafka-topics --create --topic stats.user-actions.v1
+                     --partitions 1 --replication-factor 1 --if-not-exists
+                     --bootstrap-server kafka:29092 &&
+        kafka-topics --create --topic stats.events-similarity.v1
+                     --partitions 1 --replication-factor 1 --if-not-exists
+                     --bootstrap-server kafka:29092
+      "
+    restart: on-failure
