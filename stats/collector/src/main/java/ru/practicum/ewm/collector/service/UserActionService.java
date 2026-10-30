@@ -1,5 +1,6 @@
 package ru.practicum.ewm.collector.service;
 
+import java.util.concurrent.ExecutionException;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +28,13 @@ public class UserActionService {
     public void collect(UserActionProto action) {
         UserActionAvro avroAction = mapper.toAvro(action);
         byte[] payload = serializer.serialize(avroAction);
-        producer.send(new ProducerRecord<>(topic, String.valueOf(action.getUserId()), payload));
+        try {
+            producer.send(new ProducerRecord<>(topic, String.valueOf(action.getUserId()), payload)).get();
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted while publishing user action", exception);
+        } catch (ExecutionException exception) {
+            throw new IllegalStateException("Failed to publish user action to Kafka", exception.getCause());
+        }
     }
 }
