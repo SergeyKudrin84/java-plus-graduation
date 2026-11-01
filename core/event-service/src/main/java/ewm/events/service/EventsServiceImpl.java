@@ -1,10 +1,9 @@
 package ewm.events.service;
 
 import client.StatsClient;
+import client.dto.EndpointHitDto;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ewm.dto.EndpointHitDto;
-import ewm.dto.ViewStatsDto;
 import ewm.events.dto.*;
 import ewm.events.dto.params.AdminEventParams;
 import ewm.events.dto.params.PaginationParams;
@@ -18,9 +17,7 @@ import ewm.events.repository.specification.EventSpecification;
 import ewm.exception.ConflictException;
 import ewm.exception.NotFoundException;
 import ewm.exception.ValidationException;
-import ewm.feign.client.CategoryClient;
-import ewm.feign.client.ParticipationRequestClient;
-import ewm.feign.client.UserClient;
+import ewm.feign.client.*;
 import ewm.feign.client.dto.*;
 import ewm.feign.mapper.UserMapper;
 import jakarta.servlet.http.HttpServletRequest;
