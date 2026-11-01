@@ -15,8 +15,8 @@ enum ActionTypeProto {
 }
 
 message UserActionProto {
-  int32 user_id = 1; // идентификатор пользователя, совершившего действие
-  int32 event_id = 2; //идентификатор мероприятия, с которым связано действие
+  int64 user_id = 1; // идентификатор пользователя, совершившего действие
+  int64 event_id = 2; //идентификатор мероприятия, с которым связано действие
   ActionTypeProto action_type = 3; //тип действия
   google.protobuf.Timestamp timestamp = 4; //временна́я метка, указывающая время действия
 }

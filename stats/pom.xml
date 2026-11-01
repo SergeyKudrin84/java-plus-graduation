@@ -21,6 +21,7 @@
         <module>collector</module>
         <module>kafka</module>
         <module>aggregator</module>
+        <module>analyzer</module>
     </modules>
 
     
