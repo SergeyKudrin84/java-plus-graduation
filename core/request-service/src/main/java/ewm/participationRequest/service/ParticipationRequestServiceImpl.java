@@ -1,5 +1,7 @@
 package ewm.participationRequest.service;
 
+import client.CollectorClient;
+import com.google.protobuf.Timestamp;
 import ewm.exception.ConflictException;
 import ewm.exception.NotFoundException;
 import ewm.exception.ValidationException;
@@ -19,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.ewm.stats.proto.ActionTypeProto;
+import ru.practicum.ewm.stats.proto.UserActionProto;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -42,6 +46,8 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     private final EventClient eventClient;
     private final ParticipationRequestsRepository requestRepository;
     private final ParticipationRequestMapper requestMapper;
+
+    private final CollectorClient collectorClient;
 
     @Override
     public List<ParticipationRequestDto> getUserRequests(Long userId) {
@@ -95,6 +101,8 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         request.setCreated(LocalDateTime.now());
 
         ParticipationRequest saveRequest = requestRepository.save(request);
+
+        collectUserAction(userId, eventId);
 
         return requestMapper.toDto(saveRequest);
     }
@@ -267,5 +275,23 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
                         .map(requestMapper::toDto)
                         .toList())
                 .build();
+    }
+
+    private void collectUserAction(Long userId, Long eventId) {
+        long currentTimeMillis = System.currentTimeMillis();
+
+        Timestamp timestamp = Timestamp.newBuilder()
+                .setSeconds(currentTimeMillis / 1_000)
+                .setNanos((int) (currentTimeMillis % 1_000) * 1_000_000)
+                .build();
+
+        UserActionProto action = UserActionProto.newBuilder()
+                .setUserId(userId)
+                .setEventId(eventId)
+                .setActionType(ActionTypeProto.ACTION_REGISTER)
+                .setTimestamp(timestamp)
+                .build();
+
+        collectorClient.collectUserAction(action);
     }
 }

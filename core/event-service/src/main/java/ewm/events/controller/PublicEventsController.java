@@ -13,10 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,8 +36,7 @@ public class PublicEventsController {
             @RequestParam(defaultValue = "false") Boolean onlyAvailable,
             @RequestParam(required = false) EventSort sort,
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-            @RequestParam(defaultValue = "10") @Positive Integer size,
-            HttpServletRequest request
+            @RequestParam(defaultValue = "10") @Positive Integer size
     ) {
         log.info("GET /events: text={}, categories={}, paid={}", text, categories, paid);
 
@@ -56,13 +52,40 @@ public class PublicEventsController {
                 .size(size)
                 .build();
 
-        return ResponseEntity.ok(eventsService.getEvents(searchParams, request));
+        return ResponseEntity.ok(eventsService.getEvents(searchParams));
     }
 
     @GetMapping("/events/{id}")
-    public ResponseEntity<EventFullDto> getEvent(@PathVariable Long id, HttpServletRequest request) {
+    public ResponseEntity<EventFullDto> getEvent(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-EWM-USER-ID", required = false) Long userId) {
         log.info("GET /events/{}", id);
 
-        return ResponseEntity.ok(eventsService.getEvent(id, request));
+        return ResponseEntity.ok(eventsService.getEvent(id, userId));
+    }
+
+    @GetMapping("/events/recommendations")
+    public ResponseEntity<List<EventShortDto>> getRecommendations(
+            @RequestHeader("X-EWM-USER-ID") Long userId,
+            @RequestParam(defaultValue = "10") @Positive Integer maxResults
+    ) {
+        log.info("GET /events/recommendations: userId={}, maxResults={}",
+                userId, maxResults);
+
+        return ResponseEntity.ok(
+                eventsService.getRecommendations(userId, maxResults)
+        );
+    }
+
+    @PutMapping("/events/{eventId}/like")
+    public ResponseEntity<Void> likeEvent(
+            @PathVariable Long eventId,
+            @RequestHeader("X-EWM-USER-ID") long userId
+    ) {
+        log.info("PUT /events/{}/like: userId={}", eventId, userId);
+
+        eventsService.likeEvent(eventId, userId);
+
+        return ResponseEntity.ok().build();
     }
 }
