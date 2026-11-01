@@ -140,7 +140,9 @@ public class EventsServiceImpl implements EventsService {
             throw new NotFoundException("Event с id=" + id + " не найден");
         }
 
-        collectUserAction(userId, id, ActionTypeProto.ACTION_VIEW);
+        if (userId != null) {
+            collectUserAction(userId, id, ActionTypeProto.ACTION_VIEW);
+        }
 
         EventFullDto dto = eventMapper.toEventFullDto(event);
         enrichEventFullDtoWithInitiator(event, dto);
