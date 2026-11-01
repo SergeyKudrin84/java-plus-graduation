@@ -801,4 +801,28 @@ public class EventsServiceImpl implements EventsService {
 
         return getEventsByIds(recommendedEventIds);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void likeEvent(Long eventId, Long userId) {
+        eventsRepository.findById(eventId)
+                .orElseThrow(() ->
+                        new NotFoundException("Event с id=" + eventId + " не найден"));
+
+        boolean isRegistered = participationRequestClient.getEventRequests(eventId)
+                .stream()
+                .anyMatch(request ->
+                        request.getRequester().equals(userId)
+                                && request.getStatus() == ParticipationStatus.CONFIRMED
+                );
+
+        if (!isRegistered) {
+            throw new ValidationException(
+                    "Пользователь с id=" + userId
+                            + " не зарегистрирован на мероприятие с id=" + eventId
+            );
+        }
+
+        collectUserAction(userId, eventId, ActionTypeProto.ACTION_LIKE);
+    }
 }

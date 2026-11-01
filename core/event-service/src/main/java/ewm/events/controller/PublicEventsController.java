@@ -74,4 +74,16 @@ public class PublicEventsController {
                 eventsService.getRecommendations(userId, maxResults)
         );
     }
+
+    @PutMapping("/events/{eventId}/like")
+    public ResponseEntity<Void> likeEvent(
+            @PathVariable Long eventId,
+            @RequestHeader("X-EWM-USER-ID") long userId
+    ) {
+        log.info("PUT /events/{}/like: userId={}", eventId, userId);
+
+        eventsService.likeEvent(eventId, userId);
+
+        return ResponseEntity.ok().build();
+    }
 }

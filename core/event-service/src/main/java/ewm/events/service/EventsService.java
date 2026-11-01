@@ -41,4 +41,6 @@ public interface EventsService {
     boolean existsByCategoryId(Long categoryId);
 
     List<EventShortDto> getRecommendations(Long userId, Integer maxResults);
+
+    void likeEvent(Long eventId, Long userId);
 }
