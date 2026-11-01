@@ -782,4 +782,23 @@ public class EventsServiceImpl implements EventsService {
     public boolean existsByCategoryId(Long categoryId) {
         return eventsRepository.existsByCategoryId(categoryId);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EventShortDto> getRecommendations(Long userId, Integer maxResults) {
+        if (maxResults == null || maxResults <= 0) {
+            throw new ValidationException("maxResults должен быть больше 0");
+        }
+
+        List<Long> recommendedEventIds = analyzerClient
+                .getRecommendationsForUser(userId, maxResults)
+                .map(RecommendedEventProto::getEventId)
+                .toList();
+
+        if (recommendedEventIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return getEventsByIds(recommendedEventIds);
+    }
 }

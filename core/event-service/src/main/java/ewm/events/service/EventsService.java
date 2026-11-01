@@ -39,4 +39,6 @@ public interface EventsService {
     List<EventShortDto> getEventsByIds(List<Long> eventIds);
 
     boolean existsByCategoryId(Long categoryId);
+
+    List<EventShortDto> getRecommendations(Long userId, Integer maxResults);
 }

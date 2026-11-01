@@ -61,4 +61,17 @@ public class PublicEventsController {
 
         return ResponseEntity.ok(eventsService.getEvent(id, userId));
     }
+
+    @GetMapping("/events/recommendations")
+    public ResponseEntity<List<EventShortDto>> getRecommendations(
+            @RequestHeader("X-EWM-USER-ID") Long userId,
+            @RequestParam(defaultValue = "10") @Positive Integer maxResults
+    ) {
+        log.info("GET /events/recommendations: userId={}, maxResults={}",
+                userId, maxResults);
+
+        return ResponseEntity.ok(
+                eventsService.getRecommendations(userId, maxResults)
+        );
+    }
 }
