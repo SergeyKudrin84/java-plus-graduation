@@ -8,19 +8,18 @@ import ewm.events.dto.params.UserEventPathParams;
 import ewm.feign.client.dto.EventRequestStatusUpdateRequest;
 import ewm.feign.client.dto.EventRequestStatusUpdateResult;
 import ewm.feign.client.dto.ParticipationRequestDto;
-import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
 public interface EventsService {
 
-    List<EventShortDto> getEvents(PublicEventParams params, HttpServletRequest request);
+    List<EventShortDto> getEvents(PublicEventParams params);
 
-    EventFullDto getEvent(Long id, HttpServletRequest request);
+    EventFullDto getEvent(Long id, Long userId);
 
     EventFullDto createEvent(Long userId, NewEventDto dto);
 
-    List<EventShortDto> getUserEvents(Long userId, PaginationParams params, HttpServletRequest request);
+    List<EventShortDto> getUserEvents(Long userId, PaginationParams params);
 
     EventFullDto getUserEvent(UserEventPathParams params);
 

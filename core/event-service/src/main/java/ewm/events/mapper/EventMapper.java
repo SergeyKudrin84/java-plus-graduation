@@ -24,11 +24,11 @@ public interface EventMapper {
     @Mapping(target = "location", source = "dto.location")
     Event toEvent(NewEventDto dto, Long categoryId, Long initiatorId);
 
-    @Mapping(target = "views", ignore = true)
+    @Mapping(target = "rating", ignore = true)
     @Mapping(target = "confirmedRequests", ignore = true)
     EventFullDto toEventFullDto(Event event);
 
-    @Mapping(target = "views", ignore = true)
+    @Mapping(target = "rating", ignore = true)
     @Mapping(target = "confirmedRequests", ignore = true)
     EventShortDto toEventShortDto(Event event);
 
